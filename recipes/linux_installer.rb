@@ -31,9 +31,11 @@ if confluence_version != node['confluence']['version']
     )
   end
 
+  Chef::Resource::RemoteFile.send(:include, Confluence::Helpers)
+
   remote_file "#{Chef::Config[:file_cache_path]}/atlassian-confluence-#{node['confluence']['version']}-#{node['confluence']['arch']}.bin" do
-    source node['confluence']['url']
-    checksum node['confluence']['checksum']
+    source confluence_artifact_url
+    checksum confluence_artifact_checksum
     mode '0755'
     action :create
   end
@@ -60,8 +62,7 @@ execute 'Generating Self-Signed Java Keystore' do
 end
 
 if settings['database']['type'] == 'mysql'
-  include_recipe 'mysql_connector'
-  mysql_connector_j "#{node['confluence']['install_path']}/lib"
+  mysql_connector_j "#{node['confluence']['install_path']}/confluence/WEB-INF/lib"
 end
 
 if node['init_package'] == 'systemd'

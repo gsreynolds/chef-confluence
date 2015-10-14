@@ -51,19 +51,20 @@ execute 'Generating Self-Signed Java Keystore' do
   only_if { settings['tomcat']['keystoreFile'] == "#{node['confluence']['home_path']}/.keystore" }
 end
 
+Chef::Resource::Ark.send(:include, Confluence::Helpers)
+
 ark 'confluence' do
-  url node['confluence']['url']
+  url confluence_artifact_url
   prefix_root File.dirname(node['confluence']['install_path'])
   home_dir node['confluence']['install_path']
-  checksum node['confluence']['checksum']
+  checksum confluence_artifact_checksum
   version node['confluence']['version']
   owner node['confluence']['user']
   group node['confluence']['user']
 end
 
 if settings['database']['type'] == 'mysql'
-  include_recipe 'mysql_connector'
-  mysql_connector_j "#{node['confluence']['install_path']}/lib"
+  mysql_connector_j "#{node['confluence']['install_path']}/confluence/WEB-INF/lib"
 end
 
 if node['init_package'] == 'systemd'
