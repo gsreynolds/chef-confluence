@@ -1,4 +1,6 @@
-# chef-confluence [![Build Status](https://secure.travis-ci.org/bflad/chef-confluence.png?branch=master)](http://travis-ci.org/bflad/chef-confluence)
+# chef-confluence
+[![Cookbook Version](https://img.shields.io/cookbook/v/confluence.svg)](https://supermarket.chef.io/cookbooks/confluence)
+[![Build Status](https://secure.travis-ci.org/parallels-cookbooks/confluence.png?branch=master)](http://travis-ci.org/parallels-cookbooks/confluence)
 
 ## Description
 
@@ -51,15 +53,17 @@ These attributes are under the `node['confluence']` namespace.
 
 Attribute | Description | Type | Default
 ----------|-------------|------|--------
-arch | architecture for Confluence installer - "x64" or "x32" | String | auto-detected (see attributes/default.rb)
-checksum | SHA256 checksum for Confluence install | String | auto-detected (see attributes/default.rb)
+checksum | SHA256 checksum for Confluence install | String | auto-detected by library method
 home_path | home directory for Confluence user | String | /var/atlassian/application-data/confluence
 install_path | location to install Confluence | String | /opt/atlassian/confluence
 install_type | Confluence install type - "installer", "standalone" | String | installer
-url_base | URL base for Confluence install | String | http://www.atlassian.com/software/confluence/downloads/binary/atlassian-confluence
-url | URL for Confluence install | String | auto-detected (see attributes/default.rb)
+url | URL for Confluence install | String | auto-detected by library method
 user | user running Confluence | String | confluence
-version | Confluence version to install | String | 5.8.8
+version | Confluence version to install | String | 5.8.13
+
+**Upgrade Notice:** If `['confluence']['install_type']` is set to `installer`, then the installer will try to ugrade your Confluence instance located in `['confluence']['install_path']` (if exists) up to the `['confluence']['version']`.
+
+To avoid an unexecеped upgrade, just set or override `['confluence']['version']` attribute value to your current Confluence version.
 
 ### Confluence Database Attributes
 
@@ -89,15 +93,9 @@ java_opts | additional JAVA_OPTS to be passed to Confluence JVM during startup |
 
 These attributes are under the `node['confluence']['tomcat']` namespace.
 
-Any `node['confluence']['tomcat']['key*']` attributes are overridden by `confluence/confluence` encrypted data bag (Hosted Chef) or data bag (Chef Solo), if it exists
-
 Attribute | Description | Type | Default
 ----------|-------------|------|--------
-keyAlias | Tomcat SSL keystore alias | String | tomcat
-keystoreFile | Tomcat SSL keystore file - will automatically generate self-signed keystore file if left as default | String | `#{node['confluence']['home_path']}/.keystore`
-keystorePass | Tomcat SSL keystore passphrase | String | changeit
 port | Tomcat HTTP port | Fixnum | 8090
-ssl_port | Tomcat HTTPS port | Fixnum | 8443
 
 ## Recipes
 
@@ -140,11 +138,6 @@ Repeat for other Chef environments as necessary. Example:
           "name": "confluence",
           "user": "confluence",
           "password": "confluence_db_password",
-        },
-        "tomcat": {
-          "keyAlias": "not_tomcat",
-          "keystoreFile": "/etc/pki/java/wildcard_cert.jks",
-          "keystorePass": "not_changeit"
         }
       }
     }

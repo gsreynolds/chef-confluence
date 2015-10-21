@@ -17,8 +17,6 @@
 # limitations under the License.
 #
 
-settings = merge_confluence_settings
-
 # Install or upgrade confluence
 if confluence_version != node['confluence']['version']
   template "#{Chef::Config[:file_cache_path]}/atlassian-confluence-response.varfile" do
@@ -33,7 +31,7 @@ if confluence_version != node['confluence']['version']
 
   Chef::Resource::RemoteFile.send(:include, Confluence::Helpers)
 
-  remote_file "#{Chef::Config[:file_cache_path]}/atlassian-confluence-#{node['confluence']['version']}-#{node['confluence']['arch']}.bin" do
+  remote_file "#{Chef::Config[:file_cache_path]}/atlassian-confluence-#{node['confluence']['version']}.bin" do
     source confluence_artifact_url
     checksum confluence_artifact_checksum
     mode '0755'
@@ -42,56 +40,6 @@ if confluence_version != node['confluence']['version']
 
   execute "Installing Confluence #{node['confluence']['version']}" do
     cwd Chef::Config[:file_cache_path]
-    command "./atlassian-confluence-#{node['confluence']['version']}-#{node['confluence']['arch']}.bin -q -varfile atlassian-confluence-response.varfile"
+    command "./atlassian-confluence-#{node['confluence']['version']}.bin -q -varfile atlassian-confluence-response.varfile"
   end
-end
-
-execute 'Generating Self-Signed Java Keystore' do
-  command <<-COMMAND
-    #{node['confluence']['install_path']}/jre/bin/keytool -genkey \
-      -alias #{settings['tomcat']['keyAlias']} \
-      -keyalg RSA \
-      -dname 'CN=#{node['fqdn']}, OU=Example, O=Example, L=Example, ST=Example, C=US' \
-      -keypass #{settings['tomcat']['keystorePass']} \
-      -storepass #{settings['tomcat']['keystorePass']} \
-      -keystore #{settings['tomcat']['keystoreFile']}
-    chown #{node['confluence']['user']}:#{node['confluence']['user']} #{settings['tomcat']['keystoreFile']}
-  COMMAND
-  creates settings['tomcat']['keystoreFile']
-  only_if { settings['tomcat']['keystoreFile'] == "#{node['confluence']['home_path']}/.keystore" }
-end
-
-if settings['database']['type'] == 'mysql'
-  mysql_connector_j "#{node['confluence']['install_path']}/confluence/WEB-INF/lib"
-end
-
-if node['init_package'] == 'systemd'
-  execute 'systemctl-daemon-reload' do
-    command '/bin/systemctl --system daemon-reload'
-    action :nothing
-  end
-
-  template '/etc/systemd/system/confluence.service' do
-    source 'confluence.systemd.erb'
-    owner 'root'
-    group 'root'
-    mode 00755
-    action :create
-    notifies :run, 'execute[systemctl-daemon-reload]', :immediately
-    notifies :restart, 'service[confluence]', :delayed
-  end
-else
-  template '/etc/init.d/confluence' do
-    source 'confluence.init.erb'
-    owner 'root'
-    group 'root'
-    mode 00755
-    action :create
-    notifies :restart, 'service[confluence]', :delayed
-  end
-end
-
-service 'confluence' do
-  supports :status => true, :restart => true
-  action :enable
 end

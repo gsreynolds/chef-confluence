@@ -17,8 +17,6 @@
 # limitations under the License.
 #
 
-settings = merge_confluence_settings
-
 directory File.dirname(node['confluence']['home_path']) do
   owner 'root'
   group 'root'
@@ -36,21 +34,6 @@ user node['confluence']['user'] do
   action :create
 end
 
-execute 'Generating Self-Signed Java Keystore' do
-  command <<-COMMAND
-    #{node['java']['java_home']}/bin/keytool -genkey \
-      -alias #{settings['tomcat']['keyAlias']} \
-      -keyalg RSA \
-      -dname 'CN=#{node['fqdn']}, OU=Example, O=Example, L=Example, ST=Example, C=US' \
-      -keypass #{settings['tomcat']['keystorePass']} \
-      -storepass #{settings['tomcat']['keystorePass']} \
-      -keystore #{settings['tomcat']['keystoreFile']}
-    chown #{node['confluence']['user']}:#{node['confluence']['user']} #{settings['tomcat']['keystoreFile']}
-  COMMAND
-  creates settings['tomcat']['keystoreFile']
-  only_if { settings['tomcat']['keystoreFile'] == "#{node['confluence']['home_path']}/.keystore" }
-end
-
 Chef::Resource::Ark.send(:include, Confluence::Helpers)
 
 ark 'confluence' do
@@ -61,40 +44,4 @@ ark 'confluence' do
   version node['confluence']['version']
   owner node['confluence']['user']
   group node['confluence']['user']
-end
-
-if settings['database']['type'] == 'mysql'
-  mysql_connector_j "#{node['confluence']['install_path']}/confluence/WEB-INF/lib"
-end
-
-if node['init_package'] == 'systemd'
-  execute 'systemctl-daemon-reload' do
-    command '/bin/systemctl --system daemon-reload'
-    action :nothing
-  end
-
-  template '/etc/systemd/system/confluence.service' do
-    source 'confluence.systemd.erb'
-    owner 'root'
-    group 'root'
-    mode 00755
-    action :create
-    notifies :run, 'execute[systemctl-daemon-reload]', :immediately
-    notifies :restart, 'service[confluence]', :delayed
-  end
-else
-  template '/etc/init.d/confluence' do
-    source 'confluence.init.erb'
-    owner 'root'
-    group 'root'
-    mode 00755
-    action :create
-    notifies :restart, 'service[confluence]', :delayed
-  end
-end
-
-service 'confluence' do
-  supports :status => true, :restart => true
-  action :enable
-  subscribes :restart, 'java_ark[jdk]'
 end
