@@ -1,51 +1,41 @@
-# chef-confluence
+# Confluence Cookbook
 [![Cookbook Version](https://img.shields.io/cookbook/v/confluence.svg)](https://supermarket.chef.io/cookbooks/confluence)
 [![Build Status](https://secure.travis-ci.org/parallels-cookbooks/confluence.png?branch=master)](http://travis-ci.org/parallels-cookbooks/confluence)
 
 ## Description
 
-Installs/Configures Atlassian Confluence server. Please see [COMPATIBILITY.md](COMPATIBILITY.md) for more information about Confluence releases that are tested and supported by this cookbook and its versions.
+Installs/Configures an instance of [Atlassian Confluence](https://www.atlassian.com/software/confluence/).
 
 ## Requirements
 
 ### Platforms
 
-* CentOS 6
-* RedHat 6
-* Ubuntu 12.04
-
-### Databases
-
-* MySQL
-* Postgres
+* RHEL/CentOS 6, 7
+* Ubuntu 12.04, 14.04
 
 ### Cookbooks
 
-Required [Opscode Cookbooks](https://github.com/opscode-cookbooks/)
-
-* [apache2](https://github.com/opscode-cookbooks/apache2) (if using Apache 2 proxy)
-* [database](https://github.com/opscode-cookbooks/database)
-* [mysql](https://github.com/opscode-cookbooks/mysql) (if using MySQL database)
-* [postgresql](https://github.com/opscode-cookbooks/postgresql) (if using Postgres database)
-
-Required Third-Party Cookbooks
-
-* [mysql_connector](https://github.com/bflad/chef-mysql_connector) (if using MySQL database)
-
-Suggested [Opscode Cookbooks](https://github.com/opscode-cookbooks/)
-
-* [java](https://github.com/opscode-cookbooks/java)
+* [apache2](https://github.com/svanzoest-cookbooks/apache2)
+* [ark](https://github.com/burtlo/ark)
+* [database](https://github.com/chef-cookbooks/database)
+* [java](https://github.com/agileorbit-cookbooks/java)
+* [mysql](https://github.com/chef-cookbooks/mysql)
+* [mysql_connector](https://github.com/bflad/chef-mysql_connector)
+* [mysql2_chef_gem](https://github.com/chef-cookbooks/mysql_chef_gem)
+* [postgresql](https://github.com/hw-cookbooks/postgresql)
 
 ### JDK/JRE
 
 The Atlassian Confluence Linux installer will automatically configure a bundled JRE.
 
-If you prefer Confluence stadalone installation, then you have to manage JDK/JRE 8
+If you prefer Confluence standalone installation, then you have to manage JDK/JRE 8
 ([Supported Platforms](https://confluence.atlassian.com/display/DOC/Supported+Platforms))
 on this node. It can be done with `java` cookbook and appropricate attributes:
 
-* `node['java']['jdk_version'] = "8"`
-* `recipe[java]`
+```ruby
+node.set['java']['jdk_version'] = "8"
+include_recipe 'java'
+```
 
 ## Attributes
 
@@ -59,23 +49,22 @@ install_path | location to install Confluence | String | /opt/atlassian/confluen
 install_type | Confluence install type - "installer", "standalone" | String | installer
 url | URL for Confluence install | String | auto-detected by library method
 user | user running Confluence | String | confluence
-version | Confluence version to install | String | 5.8.13
+version | Confluence version to install | String | 5.9.5
 
 **Notice:** If `['confluence']['install_type']` is set to `installer`, then the installer will try to upgrade your Confluence instance located in `['confluence']['install_path']` (if it exists) to the `['confluence']['version']`.
 
 If you want to avoid an unexpected upgrade, just set or override `['confluence']['version']` attribute value to that of your current confluence version.
 
-
 ### Confluence Database Attributes
 
-All of these `node['confluence']['database']` attributes are overridden by `confluence/confluence` encrypted data bag (Hosted Chef) or data bag (Chef Solo), if it exists
+These attributes are under the `node['confluence']['database']` namespace.
 
 Attribute | Description | Type | Default
 ----------|-------------|------|--------
-host | FQDN or "localhost" (localhost automatically installs `['database']['type']` server) | String | localhost
+host | FQDN or IP of database server ("127.0.0.1" automatically installs `['database']['type']` server) | String | "127.0.0.1"
 name | Confluence database name | String | confluence
 password | Confluence database user password | String | changeit
-port | Confluence database port | Fixnum | 3306
+port | Confluence database port | Fixnum | 3306 for MySQL, 5432 for PostgreSQL
 type | Confluence database type - "mysql" or "postgresql" | String | mysql
 user | Confluence database user | String | confluence
 
@@ -106,42 +95,40 @@ port | Tomcat HTTP port | Fixnum | 8090
 * `recipe[confluence::linux_installer]` Installs/configures Confluence via Linux installer"
 * `recipe[confluence::linux_standalone]` Installs/configures Confluence via Linux standalone archive"
 * `recipe[confluence::tomcat_configuration]` Configures Confluence's built-in Tomcat
+* `recipe[confluence::crowd_sso]` Configures user authentication with Crowd single sign-on
 
 ## Usage
 
-### Confluence Server Data Bag
+### Confluence Data Bag
 
-For securely overriding attributes on Hosted Chef, create a `confluence/confluence` encrypted data bag with the model below. Chef Solo can override the same attributes with a `confluence/confluence` unencrypted data bag of the same information.
+For security purposes it is recommended to use data bag for storing secrets
+like passwords and database credentials.
 
-_required:_
-* `['database']['type']` "mysql" or "postgresql"
-* `['database']['host']` FQDN or "localhost" (localhost automatically
-  installs `['database']['type']` server)
-* `['database']['name']` Name of Confluence database
-* `['database']['user']` Confluence database username
-* `['database']['password']` Confluence database username password
+You can override any attributes from the `['confluence']` namespace using the
+`confluence/confluence` data bag. It could be either encrypted or not
+encrypted by your choice.
 
-_optional:_
-* `['database']['port']` Database port, standard database port for
-  `['database']['type']`
-* `['tomcat']['keyAlias']` Tomcat HTTPS Java Keystore keyAlias, defaults to self-signed certifcate
-* `['tomcat']['keystoreFile']` Tomcat HTTPS Java Keystore keystoreFile, self-signed certificate
-* `['tomcat']['keystorePass']` Tomcat HTTPS Java Keystore keystorePass, self-signed certificate
-
-Repeat for other Chef environments as necessary. Example:
-
-    {
-      "id": "confluence"
-      "development": {
-        "database": {
-          "type": "postgresql",
-          "host": "localhost",
-          "name": "confluence",
-          "user": "confluence",
-          "password": "confluence_db_password",
-        }
-      }
+Example:
+```json
+{
+  "id": "confluence",
+  "confluence": {
+    "database": {
+      "type": "postgresql",
+      "name": "confluence_db",
+      "user": "confluence_user",
+      "password": "confluence_db_password",
     }
+  }
+}
+```
+_(Note - `"confluence"` nesting level is required!)_
+
+These credentials will be used for your Confluence installation instead of
+appropriate attribute values.
+
+Data bag's and item's names are optional and can be changed by overriding
+attributes `['confluence']['data_bag_name']` and `['confluence']['data_bag_item']`
 
 ### Confluence Server Installation
 
@@ -161,57 +148,6 @@ Using individual recipes, you can use this cookbook to configure Confluence to f
   * `knife data bag edit confluence confluence --secret-file=path/to/secret`
 * Add individual recipes to your node's run list.
 
-## Testing and Development
-
-Here's how you can quickly get testing or developing against the cookbook thanks to [Vagrant](http://vagrantup.com/) and [Berkshelf](http://berkshelf.com/).
-
-    vagrant plugin install vagrant-berkshelf
-    vagrant plugin install vagrant-cachier
-    vagrant plugin install vagrant-omnibus
-    git clone git://github.com/bflad/chef-confluence.git
-    cd chef-confluence
-    vagrant up BOX # BOX being centos5, centos6, debian7, fedora18, fedora19, fedora20, freebsd9, ubuntu1204, ubuntu1210, ubuntu1304, or ubuntu1310
-
-You may need to add the following hosts entries:
-
-* 192.168.50.10 confluence-centos-6
-* 192.168.50.10 confluence-ubuntu-1204
-* (etc.)
-
-The running Confluence server is accessible from the host machine:
-
-CentOS 6 Box:
-* Web UI: https://confluence-centos-6/
-
-Ubuntu 12.04 Box:
-* Web UI: https://confluence-ubuntu-1204/
-
-You can then SSH into the running VM using the `vagrant ssh BOX` # BOX being centos6 or ubuntu1204 command.
-The VM can easily be stopped and deleted with the `vagrant destroy`
-command. Please see the official [Vagrant documentation](http://docs.vagrantup.com/v2/cli/index.html)
-for a more in depth explanation of available commands.
-
-#### Test-Kitchen
-
-Test-Kitchen is preconfigured to work with Vagrant to integration
-testing.
-
-If your system isn't powerful enough for speedy local testing, this
-cookbook is pre-configured to easily use remote servers with
-DigitalOcean:
-
-```
-ln -s .kitchen.digitalocean.yml .kitchen.local.yml
-# Get key ID by inspecting DOM of web dashboard on keys page
-export DIGITALOCEAN_ACCESS_TOKEN=xxxxxxxxxxxx DIGITALOCEAN_SSH_KEY_IDS=123456
-bundle install
-bundle exec kitchen list
-```
-
-## Contributing
-
-Please use standard Github issues/pull requests and if possible, in combination with testing on the Vagrant boxes.
-
 ## Sponsors
 
 Development of this cookbook has been generously supported in part by
@@ -223,6 +159,7 @@ the code contributions of the following organizations:
 
 ## License and Author
 
+* Author:: Mikhail Zholobov (legal90@gmail.com, @legal90)
 * Author:: Brian Flad (<bflad417@gmail.com>, @bflad)
 * Author:: Denny Schäfer (<trash4you@online.de>, @tuxinaut)
 * Copyright:: 2013, Brian Flad

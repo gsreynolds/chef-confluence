@@ -21,17 +21,24 @@ default['confluence']['home_path']      = '/var/atlassian/application-data/confl
 default['confluence']['install_path']   = '/opt/atlassian/confluence'
 default['confluence']['install_type']   = 'installer'
 default['confluence']['user']           = 'confluence'
-default['confluence']['version']        = '5.8.13'
+default['confluence']['version']        = '5.9.5'
 
 # Defaults are automatically selected from version via helper functions
 default['confluence']['url']            = nil
 default['confluence']['checksum']       = nil
 
+# Data bag where credentials and other sensitive data could be stored (optional)
+default['confluence']['data_bag_name'] = 'confluence'
+default['confluence']['data_bag_item'] = 'confluence'
+
 default['confluence']['apache2']['access_log']         = ''
 default['confluence']['apache2']['error_log']          = ''
 default['confluence']['apache2']['port']               = 80
-default['confluence']['apache2']['virtual_host_name']  = node['fqdn']
-default['confluence']['apache2']['virtual_host_alias'] = node['hostname']
+
+# Defaults are automatically selected from fqdn and hostname via helper functions
+default['confluence']['apache2']['template_cookbook']  = 'confluence'
+default['confluence']['apache2']['virtual_host_name']  = nil
+default['confluence']['apache2']['virtual_host_alias'] = nil
 
 default['confluence']['apache2']['ssl']['access_log']       = ''
 default['confluence']['apache2']['ssl']['chain_file']       = ''
@@ -59,3 +66,8 @@ default['confluence']['jvm']['maximum_permgen'] = '256m'
 default['confluence']['jvm']['java_opts']       = ''
 
 default['confluence']['tomcat']['port']         = '8090'
+
+default['confluence']['crowd_sso']['enabled'] = false
+default['confluence']['crowd_sso']['app_name'] = nil
+default['confluence']['crowd_sso']['app_password'] = nil
+default['confluence']['crowd_sso']['crowd_base_url'] = 'http://crowd.example.com:8095/crowd'
