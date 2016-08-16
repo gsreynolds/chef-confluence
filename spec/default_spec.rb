@@ -21,19 +21,23 @@ describe 'confluence::default' do
     expect(chef_run).to render_file(path)
   end
 
-  it 'renders web.xml' do
-    path = '/opt/atlassian/confluence/conf/web.xml'
-    resource = chef_run.template(path)
-
-    expect(resource).to notify('service[confluence]').to(:restart)
-    expect(chef_run).to render_file(path)
-  end
-
   context 'for "installer" installation type' do
     it 'uses the bundled JRE' do
       expect(chef_run).to render_file('/opt/atlassian/confluence/bin/setenv.sh')
         .with_content { |content|
           expect(content).to include('JRE_HOME="/opt/atlassian/confluence/jre/"')
+        }
+    end
+  end
+
+  context 'for "installer" installation type' do
+    it 'uses JRE managed by "java" cookbook when bundled_jre attribute is false' do
+      chef_run.node.set['java']['java_home'] = '/usr/lib/jvm/java'
+      chef_run.node.set['confluence']['jvm']['bundled_jre'] = false
+
+      expect(chef_run).to render_file('/opt/atlassian/confluence/bin/setenv.sh')
+        .with_content { |content|
+          expect(content).to include('JRE_HOME="/usr/lib/jvm/java/jre/"')
         }
     end
   end

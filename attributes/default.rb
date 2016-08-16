@@ -21,7 +21,7 @@ default['confluence']['home_path']      = '/var/atlassian/application-data/confl
 default['confluence']['install_path']   = '/opt/atlassian/confluence'
 default['confluence']['install_type']   = 'installer'
 default['confluence']['user']           = 'confluence'
-default['confluence']['version']        = '5.9.10'
+default['confluence']['version']        = '5.10.3'
 
 # Defaults are automatically selected from version via helper functions
 default['confluence']['url']            = nil
@@ -60,9 +60,9 @@ default['confluence']['database']['password'] = 'changeit'
 default['confluence']['database']['type']     = 'mysql'
 default['confluence']['database']['user']     = 'confluence'
 
+default['confluence']['jvm']['bundled_jre']     = true
 default['confluence']['jvm']['minimum_memory']  = '256m'
 default['confluence']['jvm']['maximum_memory']  = '512m'
-default['confluence']['jvm']['maximum_permgen'] = '256m'
 default['confluence']['jvm']['java_opts']       = ''
 
 default['confluence']['tomcat']['port']         = '8090'

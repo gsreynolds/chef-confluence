@@ -80,6 +80,8 @@ module Confluence
         settings['database']['port'] ||= 3306
       when 'postgresql'
         settings['database']['port'] ||= 5432
+      when 'hsqldb'
+        # No-op. HSQLDB doesn't require any configuration.
       else
         raise "Unsupported database type: #{settings['database']['type']}"
       end
@@ -246,6 +248,21 @@ module Confluence
           'x32' => '11fc44e61625f151b72d16dd541c84b96f910e30f5fc51052737d41c27eb4ac9',
           'x64' => 'c9edc67069ef85e8ec4fefca440dee6c61fb3f33df9d61bcad2a0def8e8d6f09',
           'tar' => '99c468a765c0ba2a0fb535d87e017ccfdd5be78067370f8b34adc58acccd5bd2'
+        },
+        '5.10.1' => {
+          'x32' => '26164f4a8a10869224b4e9ed27969d1ce42a8c1c02b29ccfc4f6a102b494521f',
+          'x64' => '839e095b812d496c14edc34ae7206fe502c8d995e468ec1339fe786881bbde20',
+          'tar' => 'a3198bf90748b995795c429b625618f978831e81bbf0f14e41f138f324e36bca'
+        },
+        '5.10.2' => {
+          'x32' => '5b9e1f47309b7cd710fc11d9b6fb477822990f934fab7a0681bf1cc5218f7552',
+          'x64' => 'd1bf1d675e47021846c3394b6cf46ac434716b40264ec5526637f7a98430a1ad',
+          'tar' => 'ab8a527ad54b3dfd8868635ed944183310b46957a922b809921f01429613fb38'
+        },
+        '5.10.3' => {
+          'x32' => '05555962520e0434c2fa9bf986541cabb54a044e01bb58341728c2c8726aa965',
+          'x64' => '2b643c561a65b160f823c58259323ae2a04ae18fff104c9ee1bd1c90b1a69f70',
+          'tar' => '6e48857c85cdc011e75d52e4d23fa32e9c053051f132d642b284e050fd5735ab'
         }
       }
     end

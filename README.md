@@ -49,7 +49,7 @@ install_path | location to install Confluence | String | /opt/atlassian/confluen
 install_type | Confluence install type - "installer", "standalone" | String | installer
 url | URL for Confluence install | String | auto-detected by library method
 user | user running Confluence | String | confluence
-version | Confluence version to install | String | 5.9.10
+version | Confluence version to install | String | 5.10.3
 
 **Notice:** If `['confluence']['install_type']` is set to `installer`, then the installer will try to upgrade your Confluence instance located in `['confluence']['install_path']` (if it exists) to the `['confluence']['version']`.
 
@@ -65,7 +65,7 @@ host | FQDN or IP of database server ("127.0.0.1" automatically installs `['data
 name | Confluence database name | String | confluence
 password | Confluence database user password | String | changeit
 port | Confluence database port | Fixnum | 3306 for MySQL, 5432 for PostgreSQL
-type | Confluence database type - "mysql" or "postgresql" | String | mysql
+type | Confluence database type - "mysql", "postgresql", or "hsqldb" | String | mysql
 user | Confluence database user | String | confluence
 
 ### Confluence JVM Attributes
@@ -78,6 +78,7 @@ minimum_memory | JVM minimum memory | String | 512m
 maximum_memory | JVM maximum memory | String | 768m
 maximum_permgen | JVM maximum PermGen memory | String | 256m
 java_opts | additional JAVA_OPTS to be passed to Confluence JVM during startup | String | ""
+bundled_jre | prefer JRE bundled with linux installer | Boolean | true
 
 ### Confluence Tomcat Attributes
 
