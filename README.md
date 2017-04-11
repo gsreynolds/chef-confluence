@@ -11,7 +11,7 @@ Installs/Configures an instance of [Atlassian Confluence](https://www.atlassian.
 ### Platforms
 
 * RHEL/CentOS 6, 7
-* Ubuntu 12.04, 14.04
+* Ubuntu 14.04, 16.04
 
 ### Cookbooks
 
@@ -33,7 +33,7 @@ If you prefer Confluence standalone installation, then you have to manage JDK/JR
 on this node. It can be done with `java` cookbook and appropricate attributes:
 
 ```ruby
-node.set['java']['jdk_version'] = "8"
+node.default['java']['jdk_version'] = "8"
 include_recipe 'java'
 ```
 
@@ -49,7 +49,7 @@ install_path | location to install Confluence | String | /opt/atlassian/confluen
 install_type | Confluence install type - "installer", "standalone" | String | installer
 url | URL for Confluence install | String | auto-detected by library method
 user | user running Confluence | String | confluence
-version | Confluence version to install | String | 5.10.3
+version | Confluence version to install | String | 6.1.1
 
 **Notice:** If `['confluence']['install_type']` is set to `installer`, then the installer will try to upgrade your Confluence instance located in `['confluence']['install_path']` (if it exists) to the `['confluence']['version']`.
 
@@ -79,6 +79,28 @@ maximum_memory | JVM maximum memory | String | 768m
 maximum_permgen | JVM maximum PermGen memory | String | 256m
 java_opts | additional JAVA_OPTS to be passed to Confluence JVM during startup | String | ""
 bundled_jre | prefer JRE bundled with linux installer | Boolean | true
+
+### Confluence Autotune Attributes
+
+These attributes are under the `node['confluence']['autotune']` namespace. Autotune automatically determines appropriate settings for certain
+attributes. This feature is inspired by the `autotune` recipe in the https://github.com/afklm/jira cookbook. This
+initial version only supports JVM min and max memory size tuning.
+
+There are several tuning types that can be set:
+
+* 'mixed' - Confluence and DB run on the same system
+* 'dedicated' - Confluence has the system all to itself
+* 'shared' - Confluence shares the system with the DB and other applications
+
+Total available memory is auto discovered using Ohai but can be overridden by setting your own value in kB.
+
+Attribute    | Description                                                           | Type    | Default
+-------------|-----------------------------------------------------------------------|---------|------------
+enabled      | Whether or not to autotune settings.                                  | Boolean | false
+type         | Type of tuning to apply. One of 'mixed', 'dedicated' and 'shared'.    | String  | mixed
+total_memory | Total system memory to use for autotune calculations.                 | String  | Ohai value
+
+
 
 ### Confluence Tomcat Attributes
 
@@ -118,7 +140,7 @@ Example:
       "type": "postgresql",
       "name": "confluence_db",
       "user": "confluence_user",
-      "password": "confluence_db_password",
+      "password": "confluence_db_password"
     }
   }
 }
@@ -161,11 +183,13 @@ the code contributions of the following organizations:
 ## License and Author
 
 * Author:: Mikhail Zholobov (legal90@gmail.com, @legal90)
+* Author:: Azat Khadiev (anuriq@gmail.com, @anuriq)
 * Author:: Brian Flad (<bflad417@gmail.com>, @bflad)
 * Author:: Denny Schäfer (<trash4you@online.de>, @tuxinaut)
 * Copyright:: 2013, Brian Flad
 * Copyright:: 2013, University of Pennsylvania
 * Copyright:: 2013, Denny Schäfer
+* Copyright:: 2016-2017, Parallels International GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

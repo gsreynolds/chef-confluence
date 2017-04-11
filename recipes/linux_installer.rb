@@ -25,8 +25,21 @@ if confluence_version != node['confluence']['version']
     group 'root'
     mode '0644'
     variables(
-      'update' => Dir.exist?(node['confluence']['install_path'])
+      'update' => Dir.exist?(node['confluence']['install_path']),
+      'backup_when_update' => node['confluence']['backup_when_update']
     )
+  end
+
+  # Temporary workaround for bug in installer: https://jira.atlassian.com/browse/CONF-35722
+  # Remove when installer bug is fixed!
+  remote_file 'Apply workaround for Atlassian bug CONF-35722' do
+    path "#{node['confluence']['install_path']}/.install4j/response.varfile"
+    source "file://#{Chef::Config[:file_cache_path]}/atlassian-confluence-response.varfile"
+    owner 'root'
+    group 'root'
+    mode '0644'
+    action :create
+    only_if { ::File.exist?("#{node['confluence']['install_path']}/.install4j/response.varfile") }
   end
 
   Chef::Resource::RemoteFile.send(:include, Confluence::Helpers)
@@ -41,5 +54,14 @@ if confluence_version != node['confluence']['version']
   execute "Installing Confluence #{node['confluence']['version']}" do
     cwd Chef::Config[:file_cache_path]
     command "./atlassian-confluence-#{node['confluence']['version']}.bin -q -varfile atlassian-confluence-response.varfile"
+  end
+
+  # Installer always starts Confluence by `start-confluence.sh`, which could
+  # collide with a service provider (init.d/systemd). We should stop it and then
+  # start as a system service.
+  execute 'Stop Confluence' do
+    command "#{node['confluence']['install_path']}/bin/stop-confluence.sh"
+    ignore_failure true
+    notifies :restart, 'service[confluence]'
   end
 end

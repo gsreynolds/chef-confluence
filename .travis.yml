@@ -1,22 +1,26 @@
-rvm: 2.2
 sudo: required
-services: docker
+dist: trusty
 
 addons:
   apt:
     sources:
-      - chef-stable-precise
+      - chef-stable-trusty
     packages:
       - chefdk
 
+# Don't `bundle install` which takes about 1.5 mins
+install: echo "skip bundle install"
+
+services: docker
+
 env:
   matrix:
-  - INSTANCE=installer-mysql-centos-6
-  - INSTANCE=installer-mysql-ubuntu-1204
-  - INSTANCE=installer-postgresql-ubuntu-1204
+  - INSTANCE=installer-mysql-centos-7
+  - INSTANCE=installer-mysql-ubuntu-1404
+  - INSTANCE=installer-postgresql-ubuntu-1604
   - INSTANCE=standalone-mysql-ubuntu-1404
   - INSTANCE=standalone-postgresql-centos-6
-  - INSTANCE=standalone-postgresql-ubuntu-1404
+  - INSTANCE=standalone-postgresql-ubuntu-1604
 
 # Don't `bundle install`
 install: echo "skip bundle install"
@@ -26,13 +30,14 @@ before_script:
   # https://github.com/zuazo/kitchen-in-travis-native/issues/1#issuecomment-142230889
   - sudo iptables -L DOCKER || ( echo "DOCKER iptables chain missing" ; sudo iptables -N DOCKER )
   - eval "$(/opt/chefdk/bin/chef shell-init bash)"
-  - /opt/chefdk/embedded/bin/chef gem install kitchen-docker
-  - /opt/chefdk/embedded/bin/chef gem install rubocop -v 0.37
-script:
   - /opt/chefdk/embedded/bin/chef --version
-  - /opt/chefdk/embedded/bin/rubocop --version
-  - /opt/chefdk/embedded/bin/rubocop
+  - /opt/chefdk/embedded/bin/cookstyle --version
   - /opt/chefdk/embedded/bin/foodcritic --version
-  - /opt/chefdk/embedded/bin/foodcritic . --exclude spec
-  - /opt/chefdk/embedded/bin/rspec
-  - KITCHEN_LOCAL_YAML=.kitchen.docker.yml /opt/chefdk/embedded/bin/kitchen verify ${INSTANCE}
+
+script: KITCHEN_LOCAL_YAML=.kitchen.docker.yml /opt/chefdk/embedded/bin/kitchen verify ${INSTANCE}
+
+matrix:
+  include:
+    - script:
+      - /opt/chefdk/bin/chef exec rake
+      env: UNIT_AND_LINT=1

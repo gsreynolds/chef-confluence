@@ -20,13 +20,6 @@ platforms:
     box: bento/centos-7.1
     image: centos-7-0-x64
 
-- name: ubuntu-12.04
-  run_list:
-    - recipe[apt]
-  driver:
-    box: bento/ubuntu-12.04
-    image: ubuntu-12-04-x64
-
 - name: ubuntu-14.04
   run_list:
     - recipe[apt]
@@ -34,8 +27,16 @@ platforms:
     box: bento/ubuntu-14.04
     image: ubuntu-14-04-x64
 
+- name: ubuntu-16.04
+  run_list:
+    - recipe[apt]
+  driver:
+    box: bento/ubuntu-16.04
+    image: ubuntu-16-04-x64
+
 provisioner:
   name: chef_zero
+  require_chef_omnibus: "12"
   attributes:
     java:
       install_flavor: oracle

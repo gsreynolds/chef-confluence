@@ -1,5 +1,35 @@
 # Confluence Cookbook Changelog
 
+## 2.4.0 (April 6, 2017)
+IMPROVEMENTS:
+- Added hash values and support for Confluence v6.0.5 and v6.1.1
+- Added restriction to avoid testing with Chef Client v13 for now
+
+## 2.3.0 (February 23, 2017)
+IMPROVEMENTS:
+- Added autotune feature for configuring jvm settings. see README.md for details. [[GH-140]](https://github.com/parallels-cookbooks/confluence/pull/140)
+- Add temporary workaround for [CONF-35722](https://jira.atlassian.com/browse/CONF-35722). [[GH-148]](https://github.com/parallels-cookbooks/confluence/pull/148)
+
+## 2.2.0 (December 28, 2016)
+
+IMPROVEMENTS:
+- Added support of Confluence 5.10.4, 5.10.5, 5.10.6, 5.10.7, 5.10.8, 6.0.1,
+  6.0.2.
+  [[GH-127]](https://github.com/parallels-cookbooks/confluence/pull/127)
+  [[GH-135]](https://github.com/parallels-cookbooks/confluence/pull/135)
+- Added support of "hsqldb" database type
+  [[GH-117]](https://github.com/parallels-cookbooks/confluence/pull/117)
+  [[GH-119]](https://github.com/parallels-cookbooks/confluence/pull/119)
+- Don't redirect /server-status for monitoring systems
+  [[GH-128]](https://github.com/parallels-cookbooks/confluence/pull/128)
+
+BUG FIXES:
+- Add a matching quote to JAVA_OPTS variable.
+  [[GH-124]](https://github.com/parallels-cookbooks/confluence/pull/124)
+- Fix initial service start after installing Confluence with .bin installer
+  on systemd-driven systems.
+  [[GH-136]](https://github.com/parallels-cookbooks/confluence/pull/136)
+
 ## 2.1.1 (August 5, 2016)
 
 IMPROVEMENTS:
