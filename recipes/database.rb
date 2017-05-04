@@ -22,12 +22,12 @@ settings = merge_confluence_settings
 case settings['database']['type']
 when 'mysql'
   mysql2_chef_gem 'confluence' do
-    client_version settings['database']['version'] if settings['database']['version']
+    # package_version settings['database']['version'] if settings['database']['version']
     action :install
   end
 
   mysql_service 'confluence' do
-    version settings['database']['version'] if settings['database']['version']
+    # version settings['database']['version'] if settings['database']['version']
     bind_address settings['database']['host']
     port settings['database']['port'].to_s
     data_dir node['mysql']['data_dir'] if node['mysql']['data_dir']
