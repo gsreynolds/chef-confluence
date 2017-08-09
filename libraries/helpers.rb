@@ -291,6 +291,34 @@ module Confluence
           'x64' => '5e6d69c50bd75c26f51a549470c8b5497f7c6e57ebcbf8e5db630129a041f3de',
           'tar' => '4477ae6573ebc722dc318a1496b1f0d671a854449eb485d6705d8e4855ef61a9',
         },
+        '6.1.3' => {
+          'x64' => 'a0db09c6c53550108cd8fbf36d576f7f28399b0fb1e64227d4be6d79c141c1d3',
+          'tar' => 'ddfcdfe2b8eeb943045e22488f1a61b2b0b890810e2142712d032f8553fe1e99',
+        },
+        '6.1.4' => {
+          'x64' => 'a7bf2288711a112f5e703bf97957dc5988e7c78ff58db092577dc577909ea8be',
+          'tar' => '2d3fdb14edfa77d978a35adb93ec623304c3d7acebfc37037ebf76683fa5b71b',
+        },
+        '6.2.0' => {
+          'x64' => '2118fbb64bfd9b594bfad111028e6abb6a4cfbd3f3e49e3036dc0836518d1282',
+          'tar' => '97f170e6726f88520c7f4ea267d19da02d409a094d7c059652b466b821e9dee1',
+        },
+        '6.2.1' => {
+          'x64' => 'a16e4233efe599ca6bbac91508385f6606450d994ee8d8e79ce925c9cb9d9a9a',
+          'tar' => '4900199d8f3de0b8f66469ea11bbc0fe47cd109eab42f4b491b64ccde70a8fca',
+        },
+        '6.2.2' => {
+          'x64' => 'e32c78fd7a82073f06ce9f57472348714c8d9db17b972a6fcfa73de66bc66f59',
+          'tar' => 'ef29982fd3b8a9f58430f120a1bc303a78487faf840f0dd6e9a80a34523af6ba',
+        },
+        '6.2.3' => {
+          'x64' => 'e11d89c8f806c71ebfa33a4c575fb0a0955eed20c955d1d6f501aec97693e31e',
+          'tar' => 'bfbe4a90eec7b5cda4f564743314155b107d13f03d347f16ae0899252cf7587a',
+        },
+        '6.3.1' => {
+          'x64' => 'e0adb605f75028c34461c46582aa14c1acf89bb15213df437c51fbf15f701091',
+          'tar' => '2099d20b6b7b678f3be87972c656fad3cd65ae8517f5de56cafb454d3062f038',
+        },
       }
     end
 
